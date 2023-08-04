@@ -31,21 +31,30 @@ request_page_num = 1
 all_activities = []
 while True:
     param = {'per page': 200, 'page': request_page_num}
-    my_dataset = requests.get(activities_url, headers=header,params=param).json()
-    if len(my_dataset) == 0:
+    get_activities = requests.get(activities_url, headers=header,params=param).json()
+    if len(get_activities) == 0:
         break
-    all_activities.extend(my_dataset)
+    all_activities.extend(get_activities)
     request_page_num += 1
-
-# Activity data analysis
 all_activities_df = pd.DataFrame(all_activities)
+
+# Getting segment data
+print("\nGetting Segment Data...")
+bounds = [51.036047, -114.150184, 51.054738, -114.111313]
+segments_url = "https://www.strava.com/api/v3/segments/explore"
+header = {'Authorization': 'Bearer ' + access_token}
+param = {'bounds': ','.join(str(coord) for coord in bounds)}
+get_segments = requests.get(segments_url, headers=header, params=param).json()
+all_segments = pd.DataFrame(get_segments)
+normalized_data = pd.json_normalize(all_segments['segments'])
+all_segments_df = pd.concat([all_segments, normalized_data], axis=1)
+all_segments_df.drop(columns=['segments'], inplace=True)
 
 # Bike Ride Analysis
 all_rides = all_activities_df[all_activities_df['type'] == 'Ride']
 all_bike_commutes = all_rides[all_rides['commute'] == True]
 all_rides_exc_commutes = all_rides[all_rides['commute'] == False]
 all_virtual_rides = all_activities_df[all_activities_df['type'] == 'VirtualRide']
-#print(all_rides[['start_date', 'name', 'distance', 'average_speed', 'average_watts']])
 
 print(f"\nBike Rides (excluding commutes):")
 total_rides = len(all_rides_exc_commutes)
@@ -102,3 +111,5 @@ print(f"\tAvg Distance: {round(avg_virtual_ride_distance, 1)} km")
 print(f"\tAvg Elevation: {round(avg_virtual_ride_elevation, 1)} m")
 
 # Running Analysis
+
+print(all_segments_df[['name', 'distance', 'avg_grade']])

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Strava Data Analysis</title>
+    <link rel="stylesheet" type="text/css" href="../static/styles.css"> 
+</head>
+<body>
+    <h1>Strava Data Analysis</h1>
+    <div class="flex-container">
+        <div class="flex-child rides">
+            <h2>Rides: </h2>
+            <h3>Totals:</h3>
+            <p>Activites: {{ total_rides }}</p>
+            <p>Distance: {{ total_ride_distance }} km</p>
+            <p>Elevation: {{ total_ride_elevation }} m</p>
+            <h3>Averages:</h3>
+            <p>Speed: {{ avg_ride_speed }} km/h</p>
+            <p>Power: {{ avg_ride_power }} watts</p>
+            <p>Distance: {{ avg_ride_distance }} km</p>
+            <p>Elevation: {{ avg_ride_elevation }} m</p>
+        </div>
+        <div class="flex-child commutes">
+            <h2>Commutes: </h2>
+            <h3>Totals:</h3>
+            <p>Activites: {{ total_commutes }}</p>
+            <p>Distance: {{ total_commute_distance }} km</p>
+            <p>Elevation: {{ total_commute_elevation }} m</p>
+            <h3>Averages:</h3>
+            <p>Speed: {{ avg_commute_speed }} km/h</p>
+            <p>Power: {{ avg_commute_power }} watts</p>
+            <p>Distance: {{ avg_commute_distance }} km</p>
+            <p>Elevation: {{ avg_commute_elevation }} m</p>
+        </div>
+        <div class="flex-child mtb">
+            <h2>Mountain Bike: </h2>
+            <h3>Totals:</h3>
+            <p>Activites: {{ total_mtb }}</p>
+            <p>Distance: {{ total_mtb_distance }} km</p>
+            <p>Elevation: {{ total_mtb_elevation }} m</p>
+            <h3>Averages:</h3>
+            <p>Speed: {{ avg_mtb_speed }} km/h</p>
+            <p>Power: {{ avg_mtb_power }} watts</p>
+            <p>Distance: {{ avg_mtb_distance }} km</p>
+            <p>Elevation: {{ avg_mtb_elevation }} m</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 import requests
 import urllib3
 import pandas as pd
@@ -31,7 +31,7 @@ header = {'Authorization': 'Bearer ' + access_token}
 request_page_num = 1
 all_activities = []
 while True:
-    param = {'per page': 200, 'page': request_page_num}
+    param = {'per_page': 200, 'page': request_page_num}
     get_activities = requests.get(activities_url, headers=header,params=param).json()
     if len(get_activities) == 0:
         break
@@ -117,6 +117,10 @@ def index():
                            total_commute_elevation=c3, avg_commute_speed=c4, avg_commute_power=c5, avg_commute_distance=c6, 
                            avg_commute_elevation=c7, total_mtb=m1, total_mtb_distance=m2, total_mtb_elevation=m3, avg_mtb_speed=m4, 
                            avg_mtb_power=m5, avg_mtb_distance=m6, avg_mtb_elevation=m7)
+
+@app.route('/api/all_activities')
+def get_all_activities():
+    return jsonify(all_activities)
 
 if __name__ == '__main__':
     app.run()

@@ -42,55 +42,6 @@
             </div>
         </div>
     </div>
-    <div>
-        <div class="flex-container">
-            <div class="flex-child text">
-                <h4>Select Date Range:</h4>
-            </div>
-            <div class="flex-child datepicker">
-                <div class="datepicker-container">
-                    <div id="reportrange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
-                        <i class="fa fa-calendar"></i>&nbsp;
-                        <span></span> <i class="fa fa-caret-down"></i>
-                    </div>
-                </div>
-                <script type="text/javascript">
-                    $(function() {
-                        var start = moment().subtract(29, 'days');
-                        var end = moment();
-                    
-                        function cb(start, end) {
-                            $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
-                        }
-                    
-                        $('#reportrange').daterangepicker({
-                            startDate: start,
-                            endDate: end,
-                            ranges: {
-                                'Today': [moment(), moment()],
-                                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                                'This Month': [moment().startOf('month'), moment().endOf('month')],
-                                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-                            }
-                        }, cb);
-                    
-                        cb(start, end);
-                    });
-                </script>
-            </div>
-            <div class="flex-child whitespace">
-                <h3></h3>
-            </div>
-            <div class="flex-child whitespace">
-                <h3></h3>
-            </div>
-            <div class="flex-child whitespace">
-                <h3></h3>
-            </div>
-        </div>
-    </div>    
     <button class="accordion">Rides</button>
     <div class="panel">
         <div class="flex-container">
@@ -173,7 +124,56 @@
             </div>
         </div>
     </div>
-    <div id="map"></div>
+    <div class="main-container">
+        <div class="flex-container">
+            <div class="flex-child text">
+                <h4>Select Date Range:</h4>
+            </div>
+            <div class="flex-child datepicker">
+                <div class="datepicker-container">
+                    <div id="reportrange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                        <i class="fa fa-calendar"></i>&nbsp;
+                        <span></span> <i class="fa fa-caret-down"></i>
+                    </div>
+                </div>
+                <script type="text/javascript">
+                    $(function() {
+                        var start = moment().subtract(29, 'days');
+                        var end = moment();
+                    
+                        function cb(start, end) {
+                            $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+                        }
+                    
+                        $('#reportrange').daterangepicker({
+                            startDate: start,
+                            endDate: end,
+                            ranges: {
+                                'Today': [moment(), moment()],
+                                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                            }
+                        }, cb);
+                    
+                        cb(start, end);
+                    });
+                </script>
+            </div>
+        </div>
+    </div>    
+    <div class="main-container">
+        <div class="flex-container">
+            <div class="flex-child map">
+                <div id="map"></div>
+            </div>
+            <div class="flex-child legend">
+                <p>legend...</p>
+            </div>
+        </div>
+    </div>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>

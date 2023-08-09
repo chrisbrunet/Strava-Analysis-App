@@ -1,70 +1,125 @@
-H1 {
-  text-align: center;
-}
-
+/* Body Styles */
 body {
-  font-family: sans-serif;
+  font-family: Arial, sans-serif;
+  background-color: #d9d9d9; /* Grey background */
+  margin: 0;
+  padding: 0;
 }
 
+/* Header Styles */
+h1 {
+  text-align: center;
+  margin: 20px 0;
+  color: #ff5722;
+}
+
+/* Accordion Styles */
+.accordion {
+  background-color: #ff5722; /* Darker orange similar to Strava */
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: calc(100% - 36px); /* Adjusted to evenly space panels */
+  margin: 0 18px; /* Evenly space panels from sides */
+  text-align: left;
+  border: none;
+  outline: none;
+  transition: background-color 0.4s, color 0.4s;
+  font-size: large;
+}
+
+.active, .accordion:hover {
+  background-color: #ff7043; /* Lighter shade of orange for hover effect */
+}
+
+.panel {
+  padding: 0 18px;
+  background-color: #d9d9d9;
+  display: none;
+  overflow: hidden;
+  margin: 0 18px; /* Evenly space panels from sides */
+}
+
+.main-container {
+  margin: 0 18px; /* Adjusted to match accordion margins */
+}
+
+/* Flex Container Styles */
 .flex-container {
-    display: flex;
-    font-family: sans-serif;
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10px;
+  background-color: #d9d9d9;
 }
 
 .flex-child {
-    flex: 1;
-    border: 2px solid rgb(255, 255, 255);
-}  
-
-.flex-child:first-child {
-    margin-left: 20px;
-} 
-
-#map { 
-    display: block;
-    height: 500px; 
-    margin-left: auto;
-    margin-right: auto;
+  flex: 1;
+  border: 2px solid #f5f5f5;
+  margin: 10px;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.accordion {
-    background-color: #eee;
-    color: #444;
-    cursor: pointer;
-    padding: 18px;
-    width: 100%;
-    text-align: left;
-    border: none;
-    outline: none;
-    transition: .4s;
-    font-size: large;
-  }
-  
-  .active, .accordion:hover {
-    background-color: #ccc;
-  }
-  
-  .panel {
-    padding: 0 18px;
-    background-color: white;
-    display: none;
-    overflow: hidden;
+.main-container {
+  margin: 0 18px; /* Adjusted to match accordion margins */
 }
 
-.accordion:after {
-    content: '\02795'; /* Unicode character for "plus" sign (+) */
-    font-size: 13px;
-    color: #777;
-    float: right;
-    margin-left: 5px;
-  }
-  
-  .active:after {
-    content: "\2796"; /* Unicode character for "minus" sign (-) */
-  }
+.main-container .flex-container {
+  display: flex;
+  flex-wrap: wrap;
+}
 
-  .datepicker-container {
-    display: block;
-    align-items: center; /* Vertically center the content */
-    flex-direction: column; /* Arrange the content in a column */
+.main-container .flex-child.map {
+  flex: 2; 
+}
+
+.main-container .flex-child.legend {
+  flex: 1; 
+}
+
+.main-container #map {
+  display: block;
+  height: 300px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.main-container .legend {
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+#map {
+  display: block;
+  height: 300px;
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Datepicker Styles */
+.datepicker-container {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+/* Button Styles */
+.button {
+  background-color: #ff8a65; /* A shade of orange */
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 10px 0;
+  cursor: pointer;
+  transition: background-color 0.4s;
+}
+
+.button:hover {
+  background-color: #ff7043; /* Lighter shade of orange for hover effect */
 }

@@ -2,9 +2,38 @@ from flask import Flask, render_template, jsonify
 import requests
 import urllib3
 import pandas as pd
+import numpy as np
 
 app = Flask(__name__)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+def calculate_activity_stats(data_frame, activity_type):
+    filtered_activities = data_frame[data_frame['sport_type'] == activity_type]
+    total_count = len(filtered_activities)
+    total_distance = filtered_activities['distance'].sum() / 1000
+    total_elevation = filtered_activities['total_elevation_gain'].sum()
+    avg_speed = filtered_activities['average_speed'].mean() * 3.6
+    avg_power = filtered_activities['average_watts'].mean()
+    avg_distance = filtered_activities['distance'].mean() / 1000
+    avg_elevation = filtered_activities['total_elevation_gain'].mean()
+
+    total_count = np.nan_to_num(total_count)
+    total_distance = np.nan_to_num(total_distance)
+    total_elevation = np.nan_to_num(total_elevation)
+    avg_speed = np.nan_to_num(avg_speed)
+    avg_power = np.nan_to_num(avg_power)
+    avg_distance = np.nan_to_num(avg_distance)
+    avg_elevation = np.nan_to_num(avg_elevation)
+
+    return(
+        total_count, 
+        round(total_distance, 1), 
+        round(total_elevation, 1), 
+        round(avg_speed, 1), 
+        round(avg_power, 1), 
+        round(avg_distance, 1), 
+        round(avg_elevation, 1)
+    )
 
 # Introduction
 print("\nWelcome to the Strava API Test App")
@@ -58,65 +87,41 @@ all_rides_exc_commutes = all_rides[(all_rides['commute'] == False) & (all_rides[
 all_virtual_rides = all_activities_df[all_activities_df['type'] == 'VirtualRide']
 all_mtb_rides = all_activities_df[(all_activities_df['type'] == 'Ride') & (all_activities_df['sport_type'] == 'MountainBikeRide')]
 
-# Ride Analysis
-total_rides = len(all_rides_exc_commutes)
-total_ride_distance = all_rides_exc_commutes['distance'].sum() / 1000
-total_ride_elevation = all_rides_exc_commutes['total_elevation_gain'].sum()
-avg_ride_speed = all_rides_exc_commutes['average_speed'].mean() * 3.6
-avg_ride_power = all_rides_exc_commutes['average_watts'].mean()
-avg_ride_distance = all_rides_exc_commutes['distance'].mean() / 1000
-avg_ride_elevation = all_rides_exc_commutes['total_elevation_gain'].mean()
-
-# Commute Analysis
-total_commutes = len(all_bike_commutes)
-total_commute_distance = all_bike_commutes['distance'].sum() / 1000
-total_commute_elevation = all_bike_commutes['total_elevation_gain'].sum()
-avg_commute_speed = all_bike_commutes['average_speed'].mean() * 3.6
-avg_commute_power = all_bike_commutes['average_watts'].mean()
-avg_commute_distance = all_bike_commutes['distance'].mean() / 1000
-avg_commute_elevation = all_bike_commutes['total_elevation_gain'].mean()
-
-# Mtb Analysis
-total_mtb = len(all_mtb_rides)
-total_mtb_distance = all_mtb_rides['distance'].sum() / 1000
-total_mtb_elevation = all_mtb_rides['total_elevation_gain'].sum()
-avg_mtb_speed = all_mtb_rides['average_speed'].mean() * 3.6
-avg_mtb_power = all_mtb_rides['average_watts'].mean()
-avg_mtb_distance = all_mtb_rides['distance'].mean() / 1000
-avg_mtb_elevation = all_mtb_rides['total_elevation_gain'].mean()
-
+# Run Activities
+all_outdoor_runs = all_activities_df[all_activities_df['type'] == 'Run']
+all_virtual_runs = all_activities_df[all_activities_df['type'] == 'VirtualRun']
 
 @app.route('/')
 def index():
-    v1 = total_rides
-    v2 = round(total_ride_distance, 1)
-    v3 = round(total_ride_elevation, 1)
-    v4 = round(avg_ride_speed, 1)
-    v5 = round(avg_ride_power, 1)
-    v6 = round(avg_ride_distance, 1)
-    v7 = round(avg_ride_elevation, 1)
+    # Most recent activity stats
+    date = all_activities[0]['start_date']
+    name = all_activities[0]['name']
+    type = all_activities[0]['type']
+    distance = all_activities[0]['distance']
 
-    c1 = total_commutes
-    c2 = round(total_commute_distance, 1)
-    c3 = round(total_commute_elevation, 1)
-    c4 = round(avg_commute_speed, 1)
-    c5 = round(avg_commute_power, 1)
-    c6 = round(avg_commute_distance, 1)
-    c7 = round(avg_commute_elevation, 1)
+    # Ride stats
+    r1, r2, r3, r4, r5, r6, r7 = calculate_activity_stats(all_rides_exc_commutes, 'Ride')
+    c1, c2, c3, c4, c5, c6, c7 = calculate_activity_stats(all_bike_commutes, 'Ride')
+    m1, m2, m3, m4, m5, m6, m7 = calculate_activity_stats(all_mtb_rides, 'MountainBikeRide')
+    v1, v2, v3, v4, v5, v6, v7 = calculate_activity_stats(all_virtual_rides, 'VirtualRide')
 
-    m1 = total_mtb
-    m2 = round(total_mtb_distance, 1)
-    m3 = round(total_mtb_elevation, 1)
-    m4 = round(avg_mtb_speed, 1)
-    m5 = round(avg_mtb_power, 1)
-    m6 = round(avg_mtb_distance, 1)
-    m7 = round(avg_mtb_elevation, 1)
+    # Run stats
+    or1, or2, or3, or4, or5, or6, or7 = calculate_activity_stats(all_outdoor_runs, 'Run')
+    vr1, vr2, vr3, vr4, vr5, vr6, vr7 = calculate_activity_stats(all_virtual_runs, 'VirtualRun')
+
+    # Other Stats
     
-    return render_template('index.html', total_rides=v1, total_ride_distance=v2, total_ride_elevation=v3, avg_ride_speed=v4,
-                           avg_ride_power=v5, avg_ride_distance=v6, avg_ride_elevation=v7, total_commutes=c1, total_commute_distance=c2,
-                           total_commute_elevation=c3, avg_commute_speed=c4, avg_commute_power=c5, avg_commute_distance=c6, 
-                           avg_commute_elevation=c7, total_mtb=m1, total_mtb_distance=m2, total_mtb_elevation=m3, avg_mtb_speed=m4, 
-                           avg_mtb_power=m5, avg_mtb_distance=m6, avg_mtb_elevation=m7)
+    return render_template('index.html',date=date, name=name, type=type, distance=distance, total_rides=r1, total_ride_distance=r2, 
+                           total_ride_elevation=r3, avg_ride_speed=r4, avg_ride_power=r5, avg_ride_distance=r6, avg_ride_elevation=r7, 
+                           total_commutes=c1, total_commute_distance=c2,total_commute_elevation=c3, avg_commute_speed=c4, 
+                           avg_commute_power=c5, avg_commute_distance=c6, avg_commute_elevation=c7, total_mtb=m1, total_mtb_distance=m2, 
+                           total_mtb_elevation=m3, avg_mtb_speed=m4, avg_mtb_power=m5, avg_mtb_distance=m6, avg_mtb_elevation=m7, 
+                           total_virtual_rides=v1, total_virtual_ride_distance=v2, total_virtual_ride_elevation=v3, avg_virtual_ride_speed=v4, 
+                           avg_virtual_ride_power=v5, avg_virtual_ride_distance=v6, avg_virtual_ride_elevation=v7, total_outdoor_runs=or1, 
+                           total_outdoor_run_distance=or2, total_outdoor_run_elevation=or3, avg_outdoor_run_speed=or4, avg_outdoor_run_power=or5, 
+                           avg_outdoor_distance=or6, avg_outdoor_run_elevation=or7, total_virtual_runs=vr1, total_virtual_run_distance=vr2, 
+                           total_virtual_run_elevation=vr3, avg_virtual_run_speed=vr4, avg_virtual_run_power=vr5, avg_virtual_run_distance=vr6, 
+                           avg_virtual_run_elevation=vr7)
 
 @app.route('/api/all_activities')
 def get_all_activities():

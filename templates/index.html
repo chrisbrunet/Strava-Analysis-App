@@ -3,6 +3,8 @@
 <head>
     <title>Strava Data Analysis</title>
     <link rel="stylesheet" type="text/css" href="../static/styles.css"> 
+    
+    <!-- Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""/>
@@ -10,45 +12,165 @@
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""></script>
     <script src="{{ url_for('static', filename='Polyline.encoded.js') }}"></script>
+
+    <!-- Date Range Picker -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 </head>
 <body>
     <h1>Strava Data Analysis</h1>
-    <div class="flex-container">
-        <div class="flex-child rides">
-            <h2>Rides: </h2>
-            <h3>Totals:</h3>
-            <p>Activites: {{ total_rides }}</p>
-            <p>Distance: {{ total_ride_distance }} km</p>
-            <p>Elevation: {{ total_ride_elevation }} m</p>
-            <h3>Averages:</h3>
-            <p>Speed: {{ avg_ride_speed }} km/h</p>
-            <p>Power: {{ avg_ride_power }} watts</p>
-            <p>Distance: {{ avg_ride_distance }} km</p>
-            <p>Elevation: {{ avg_ride_elevation }} m</p>
+    <button class="accordion">Most Recent Activity</button>
+    <div class="panel">
+        <div class="flex-container">
+            <div class="flex-child date">
+               <h3>Date:</h3>
+               <p>{{ date }}</p>
+            </div>
+            <div class="flex-child name">
+                <h3>Name:</h3>
+                <p>{{ name }}</p>
+            </div>
+            <div class="flex-child type">
+                <h3>Type:</h3>
+                <p>{{ type }}</p>
+            </div>
+            <div class="flex-child distance">
+                <h3>Distance:</h3>
+                <p>{{ distance }}</p>
+            </div>
         </div>
-        <div class="flex-child commutes">
-            <h2>Commutes: </h2>
-            <h3>Totals:</h3>
-            <p>Activites: {{ total_commutes }}</p>
-            <p>Distance: {{ total_commute_distance }} km</p>
-            <p>Elevation: {{ total_commute_elevation }} m</p>
-            <h3>Averages:</h3>
-            <p>Speed: {{ avg_commute_speed }} km/h</p>
-            <p>Power: {{ avg_commute_power }} watts</p>
-            <p>Distance: {{ avg_commute_distance }} km</p>
-            <p>Elevation: {{ avg_commute_elevation }} m</p>
+    </div>
+    <div>
+        <div class="flex-container">
+            <div class="flex-child text">
+                <h4>Select Date Range:</h4>
+            </div>
+            <div class="flex-child datepicker">
+                <div class="datepicker-container">
+                    <div id="reportrange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                        <i class="fa fa-calendar"></i>&nbsp;
+                        <span></span> <i class="fa fa-caret-down"></i>
+                    </div>
+                </div>
+                <script type="text/javascript">
+                    $(function() {
+                        var start = moment().subtract(29, 'days');
+                        var end = moment();
+                    
+                        function cb(start, end) {
+                            $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+                        }
+                    
+                        $('#reportrange').daterangepicker({
+                            startDate: start,
+                            endDate: end,
+                            ranges: {
+                                'Today': [moment(), moment()],
+                                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                            }
+                        }, cb);
+                    
+                        cb(start, end);
+                    });
+                </script>
+            </div>
+            <div class="flex-child whitespace">
+                <h3></h3>
+            </div>
+            <div class="flex-child whitespace">
+                <h3></h3>
+            </div>
+            <div class="flex-child whitespace">
+                <h3></h3>
+            </div>
         </div>
-        <div class="flex-child mtb">
-            <h2>Mountain Bike: </h2>
-            <h3>Totals:</h3>
-            <p>Activites: {{ total_mtb }}</p>
-            <p>Distance: {{ total_mtb_distance }} km</p>
-            <p>Elevation: {{ total_mtb_elevation }} m</p>
-            <h3>Averages:</h3>
-            <p>Speed: {{ avg_mtb_speed }} km/h</p>
-            <p>Power: {{ avg_mtb_power }} watts</p>
-            <p>Distance: {{ avg_mtb_distance }} km</p>
-            <p>Elevation: {{ avg_mtb_elevation }} m</p>
+    </div>    
+    <button class="accordion">Rides</button>
+    <div class="panel">
+        <div class="flex-container">
+            <div class="flex-child rides">
+                <h2>Road/Gravel: </h2>
+                <h3>Totals:</h3>
+                <p>Activites: {{ total_rides }}</p>
+                <p>Distance: {{ total_ride_distance }} km</p>
+                <p>Elevation: {{ total_ride_elevation }} m</p>
+                <h3>Averages:</h3>
+                <p>Speed: {{ avg_ride_speed }} km/h</p>
+                <p>Power: {{ avg_ride_power }} watts</p>
+                <p>Distance: {{ avg_ride_distance }} km</p>
+                <p>Elevation: {{ avg_ride_elevation }} m</p>
+            </div>
+            <div class="flex-child commutes">
+                <h2>Commutes: </h2>
+                <h3>Totals:</h3>
+                <p>Activites: {{ total_commutes }}</p>
+                <p>Distance: {{ total_commute_distance }} km</p>
+                <p>Elevation: {{ total_commute_elevation }} m</p>
+                <h3>Averages:</h3>
+                <p>Speed: {{ avg_commute_speed }} km/h</p>
+                <p>Power: {{ avg_commute_power }} watts</p>
+                <p>Distance: {{ avg_commute_distance }} km</p>
+                <p>Elevation: {{ avg_commute_elevation }} m</p>
+            </div>
+            <div class="flex-child mtb">
+                <h2>Mountain Bike: </h2>
+                <h3>Totals:</h3>
+                <p>Activites: {{ total_mtb }}</p>
+                <p>Distance: {{ total_mtb_distance }} km</p>
+                <p>Elevation: {{ total_mtb_elevation }} m</p>
+                <h3>Averages:</h3>
+                <p>Speed: {{ avg_mtb_speed }} km/h</p>
+                <p>Power: {{ avg_mtb_power }} watts</p>
+                <p>Distance: {{ avg_mtb_distance }} km</p>
+                <p>Elevation: {{ avg_mtb_elevation }} m</p>
+            </div>
+            <div class="flex-child virtualRides">
+                <h2>Virtual Rides: </h2>
+                <h3>Totals:</h3>
+                <p>Activites: {{ total_virtual_rides }}</p>
+                <p>Distance: {{ total_virtual_ride_distance }} km</p>
+                <p>Elevation: {{ total_virtual_ride_elevation }} m</p>
+                <h3>Averages:</h3>
+                <p>Speed: {{ avg_virtual_ride_speed }} km/h</p>
+                <p>Power: {{ avg_virtual_ride_power }} watts</p>
+                <p>Distance: {{ avg_virtual_ride_distance }} km</p>
+                <p>Elevation: {{ avg_virtual_ride_elevation }} m</p>
+            </div>
+        </div>
+    </div>
+    <button class="accordion">Runs</button>
+    <div class="panel">
+        <div class="flex-container">
+            <div class="flex-child rides">
+                <h2>Outdoor Runs: </h2>
+                <h3>Totals:</h3>
+                <p>Activites: {{ total_outdoor_runs }}</p>
+                <p>Distance: {{ total_outdoor_run_distance }} km</p>
+                <p>Elevation: {{ total_outdoor_run_elevation }} m</p>
+                <h3>Averages:</h3>
+                <p>Speed: {{ avg_outdoor_run_speed }} km/h</p>
+                <p>Power: {{ avg_outdoor_run_power }} watts</p>
+                <p>Distance: {{ avg_outdoor_distance }} km</p>
+                <p>Elevation: {{ avg_outdoor_run_elevation }} m</p>
+            </div>
+            <div class="flex-child rides">
+                <h2>Virtual Runs: </h2>
+                <h3>Totals:</h3>
+                <p>Activites: {{ total_virtual_runs }}</p>
+                <p>Distance: {{ total_virtual_run_distance }} km</p>
+                <p>Elevation: {{ total_virtual_run_elevation }} m</p>
+                <h3>Averages:</h3>
+                <p>Speed: {{ avg_virtual_run_speed }} km/h</p>
+                <p>Power: {{ avg_virtual_run_power }} watts</p>
+                <p>Distance: {{ avg_virtual_run_distance }} km</p>
+                <p>Elevation: {{ avg_virtual_run_elevation }} m</p>
+            </div>
         </div>
     </div>
     <div id="map"></div>

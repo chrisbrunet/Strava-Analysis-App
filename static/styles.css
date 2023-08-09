@@ -1,5 +1,14 @@
+H1 {
+  text-align: center;
+}
+
+body {
+  font-family: sans-serif;
+}
+
 .flex-container {
     display: flex;
+    font-family: sans-serif;
 }
 
 .flex-child {
@@ -8,10 +17,54 @@
 }  
 
 .flex-child:first-child {
-    margin-right: 20px;
+    margin-left: 20px;
 } 
 
 #map { 
+    display: block;
     height: 500px; 
-    margin-right: 50px
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.accordion {
+    background-color: #eee;
+    color: #444;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    outline: none;
+    transition: .4s;
+    font-size: large;
+  }
+  
+  .active, .accordion:hover {
+    background-color: #ccc;
+  }
+  
+  .panel {
+    padding: 0 18px;
+    background-color: white;
+    display: none;
+    overflow: hidden;
+}
+
+.accordion:after {
+    content: '\02795'; /* Unicode character for "plus" sign (+) */
+    font-size: 13px;
+    color: #777;
+    float: right;
+    margin-left: 5px;
+  }
+  
+  .active:after {
+    content: "\2796"; /* Unicode character for "minus" sign (-) */
+  }
+
+  .datepicker-container {
+    display: block;
+    align-items: center; /* Vertically center the content */
+    flex-direction: column; /* Arrange the content in a column */
 }

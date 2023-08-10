@@ -38,7 +38,7 @@
             </div>
             <div class="flex-child distance">
                 <h3>Distance:</h3>
-                <p>{{ distance }}</p>
+                <p>{{ distance }} km</p>
             </div>
         </div>
     </div>
@@ -95,10 +95,10 @@
             </div>
         </div>
     </div>
-    <button class="accordion">Runs</button>
+    <button class="accordion">Runs/Hikes</button>
     <div class="panel">
         <div class="flex-container">
-            <div class="flex-child rides">
+            <div class="flex-child runs">
                 <h2>Outdoor Runs: </h2>
                 <h3>Totals:</h3>
                 <p>Activites: {{ total_outdoor_runs }}</p>
@@ -110,7 +110,7 @@
                 <p>Distance: {{ avg_outdoor_distance }} km</p>
                 <p>Elevation: {{ avg_outdoor_run_elevation }} m</p>
             </div>
-            <div class="flex-child rides">
+            <div class="flex-child virtual_runs">
                 <h2>Virtual Runs: </h2>
                 <h3>Totals:</h3>
                 <p>Activites: {{ total_virtual_runs }}</p>
@@ -122,45 +122,41 @@
                 <p>Distance: {{ avg_virtual_run_distance }} km</p>
                 <p>Elevation: {{ avg_virtual_run_elevation }} m</p>
             </div>
+            <div class="flex-child hikes">
+                <h2>Hikes: </h2>
+                <h3>Totals:</h3>
+                <p>Activites: {{ total_hikes }}</p>
+                <p>Distance: {{ total_hike_distance }} km</p>
+                <p>Elevation: {{ total_hike_elevation }} m</p>
+                <h3>Averages:</h3>
+                <p>Speed: {{ avg_hike_speed }} km/h</p>
+                <p>Power: {{ avg_hike_power }} watts</p>
+                <p>Distance: {{ avg_hike_distance }} km</p>
+                <p>Elevation: {{ avg_hike_elevation }} m</p>
+            </div>
         </div>
     </div>
     <div class="main-container">
         <div class="flex-container">
-            <div class="flex-child text">
-                <h4>Select Date Range:</h4>
+            <div class="flex-child distance_travelled">
+                <h3>Distance Travelled:</h3>
+                <p>{{ distance_travelled }} km</p>
+                <p>That's {{ times_around_earth }} times around the earth!</p>
             </div>
-            <div class="flex-child datepicker">
-                <div class="datepicker-container">
-                    <div id="reportrange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
-                        <i class="fa fa-calendar"></i>&nbsp;
-                        <span></span> <i class="fa fa-caret-down"></i>
-                    </div>
-                </div>
-                <script type="text/javascript">
-                    $(function() {
-                        var start = moment().subtract(29, 'days');
-                        var end = moment();
-                    
-                        function cb(start, end) {
-                            $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
-                        }
-                    
-                        $('#reportrange').daterangepicker({
-                            startDate: start,
-                            endDate: end,
-                            ranges: {
-                                'Today': [moment(), moment()],
-                                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                                'This Month': [moment().startOf('month'), moment().endOf('month')],
-                                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-                            }
-                        }, cb);
-                    
-                        cb(start, end);
-                    });
-                </script>
+            <div class="flex-child elevation_gained">
+                <h3>Elevation Gained:</h3>
+                <p>{{ elevation_gained }} m</p>
+                <p>That's {{ times_up_everest }} times up Mt. Everest!</p>
+            </div>
+            <div class="flex-child heart_beats">
+                <h3>Heart Beats:</h3>
+                <p>{{ heart_beats }}</p>
+                <p>That's {{ blood_pumped }} Litres of blood pumped!</p>
+            </div>
+            <div class="flex-child kudos_received">
+                <h3>Kudos Received:</h3>
+                <p>{{ kudos_received }}</p>
+                <p>That's a lot of love!</p>
             </div>
         </div>
     </div>    
@@ -170,7 +166,46 @@
                 <div id="map"></div>
             </div>
             <div class="flex-child legend">
-                <p>legend...</p>
+                <p style="color: green;">Green: Bike Ride</p>
+                <p style="color: red;">Red: Run</p>
+                <p style="color: blue;">Blue: Alpine Ski</p>
+                <p style="color: #77C3EC;">Baby Blue: Nordic Ski</p>
+                <p style="color: brown;">Brown: Hike</p>
+                <p style="color: black;">Black: Other</p>
+                <div class="flex-container">
+                    <div class="flex-child datepicker">
+                        <div class="datepicker-container">
+                            <div id="reportrange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                                <i class="fa fa-calendar"></i>&nbsp;
+                                <span></span> <i class="fa fa-caret-down"></i>
+                            </div>
+                        </div>
+                        <script type="text/javascript">
+                            $(function() {
+                                var start = moment().subtract(29, 'days');
+                                var end = moment();
+                            
+                                function cb(start, end) {
+                                    $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+                                }
+                            
+                                $('#reportrange').daterangepicker({
+                                    startDate: start,
+                                    endDate: end,
+                                    ranges: {
+                                        'Today': [moment(), moment()],
+                                        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                                        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                                        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                                        'This Month': [moment().startOf('month'), moment().endOf('month')],
+                                        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                                    }
+                                }, cb);
+                            
+                                cb(start, end);
+                            });
+                        </script>
+                    </div>
             </div>
         </div>
     </div>

@@ -51,11 +51,13 @@
                 <p>Activites: {{ total_rides }}</p>
                 <p>Distance: {{ total_ride_distance }} km</p>
                 <p>Elevation: {{ total_ride_elevation }} m</p>
+                <p>Top Speed: {{ max_ride_speed }} km/h</p>
                 <h3>Averages:</h3>
                 <p>Speed: {{ avg_ride_speed }} km/h</p>
                 <p>Power: {{ avg_ride_power }} watts</p>
                 <p>Distance: {{ avg_ride_distance }} km</p>
                 <p>Elevation: {{ avg_ride_elevation }} m</p>
+                <p>Heart Rate: {{ avg_ride_hr }} bpm</p>
             </div>
             <div class="flex-child commutes">
                 <h2>Commutes: </h2>
@@ -63,11 +65,13 @@
                 <p>Activites: {{ total_commutes }}</p>
                 <p>Distance: {{ total_commute_distance }} km</p>
                 <p>Elevation: {{ total_commute_elevation }} m</p>
+                <p>Top Speed: {{ max_commute_speed }} km/h</p>
                 <h3>Averages:</h3>
                 <p>Speed: {{ avg_commute_speed }} km/h</p>
                 <p>Power: {{ avg_commute_power }} watts</p>
                 <p>Distance: {{ avg_commute_distance }} km</p>
                 <p>Elevation: {{ avg_commute_elevation }} m</p>
+                <p>Heart Rate: {{ avg_commute_hr }} bpm</p>
             </div>
             <div class="flex-child mtb">
                 <h2>Mountain Bike: </h2>
@@ -75,11 +79,13 @@
                 <p>Activites: {{ total_mtb }}</p>
                 <p>Distance: {{ total_mtb_distance }} km</p>
                 <p>Elevation: {{ total_mtb_elevation }} m</p>
+                <p>Top Speed: {{ max_mtb_speed }} km/h</p>
                 <h3>Averages:</h3>
                 <p>Speed: {{ avg_mtb_speed }} km/h</p>
                 <p>Power: {{ avg_mtb_power }} watts</p>
                 <p>Distance: {{ avg_mtb_distance }} km</p>
                 <p>Elevation: {{ avg_mtb_elevation }} m</p>
+                <p>Heart Rate: {{ avg_mtb_hr }} bpm</p>
             </div>
             <div class="flex-child virtualRides">
                 <h2>Virtual Rides: </h2>
@@ -87,11 +93,13 @@
                 <p>Activites: {{ total_virtual_rides }}</p>
                 <p>Distance: {{ total_virtual_ride_distance }} km</p>
                 <p>Elevation: {{ total_virtual_ride_elevation }} m</p>
+                <p>Top Speed: {{ max_virtual_ride_speed }} km/h</p>
                 <h3>Averages:</h3>
                 <p>Speed: {{ avg_virtual_ride_speed }} km/h</p>
                 <p>Power: {{ avg_virtual_ride_power }} watts</p>
                 <p>Distance: {{ avg_virtual_ride_distance }} km</p>
                 <p>Elevation: {{ avg_virtual_ride_elevation }} m</p>
+                <p>Heart Rate: {{ avg_virtual_ride_hr }} bpm</p>
             </div>
         </div>
     </div>
@@ -105,10 +113,11 @@
                 <p>Distance: {{ total_outdoor_run_distance }} km</p>
                 <p>Elevation: {{ total_outdoor_run_elevation }} m</p>
                 <h3>Averages:</h3>
-                <p>Speed: {{ avg_outdoor_run_speed }} km/h</p>
+                <p>Speed: {{ avg_outdoor_run_speed }} min/km</p>
                 <p>Power: {{ avg_outdoor_run_power }} watts</p>
                 <p>Distance: {{ avg_outdoor_distance }} km</p>
                 <p>Elevation: {{ avg_outdoor_run_elevation }} m</p>
+                <p>Heart Rate: {{ avg_outdoor_run_hr }} bpm</p>
             </div>
             <div class="flex-child virtual_runs">
                 <h2>Virtual Runs: </h2>
@@ -117,10 +126,11 @@
                 <p>Distance: {{ total_virtual_run_distance }} km</p>
                 <p>Elevation: {{ total_virtual_run_elevation }} m</p>
                 <h3>Averages:</h3>
-                <p>Speed: {{ avg_virtual_run_speed }} km/h</p>
+                <p>Speed: {{ avg_virtual_run_speed }} min\km</p>
                 <p>Power: {{ avg_virtual_run_power }} watts</p>
                 <p>Distance: {{ avg_virtual_run_distance }} km</p>
                 <p>Elevation: {{ avg_virtual_run_elevation }} m</p>
+                <p>Heart Rate: {{ avg_virtual_run_hr }} bpm</p>
             </div>
             <div class="flex-child hikes">
                 <h2>Hikes: </h2>
@@ -129,10 +139,55 @@
                 <p>Distance: {{ total_hike_distance }} km</p>
                 <p>Elevation: {{ total_hike_elevation }} m</p>
                 <h3>Averages:</h3>
-                <p>Speed: {{ avg_hike_speed }} km/h</p>
-                <p>Power: {{ avg_hike_power }} watts</p>
+                <p>Speed: {{ avg_hike_speed }} min/km</p>
                 <p>Distance: {{ avg_hike_distance }} km</p>
                 <p>Elevation: {{ avg_hike_elevation }} m</p>
+                <p>Heart Rate: {{ avg_hike_hr }} bpm</p>
+            </div>
+        </div>
+    </div>
+    <button class="accordion">Other Activities</button>
+    <div class="panel">
+        <div class="flex-container">
+            <div class="flex-child swims">
+                <h2>Swims: </h2>
+                <h3>Totals:</h3>
+                <p>Activites: {{ total_swims }}</p>
+                <p>Distance: {{ total_swim_distance }} km</p>
+                <h3>Averages:</h3>
+                <p>Speed: {{ avg_swim_speed }} min/100m</p>
+                <p>Distance: {{ avg_swim_distance }} km</p>
+                <p>Heart Rate: {{ avg_swim_hr }} bpm</p>
+            </div>
+            <div class="flex-child alpine_ski">
+                <h2>Alpine Skis: </h2>
+                <h3>Totals:</h3>
+                <p>Activites: {{ total_alpine_skis }}</p>
+                <p>Distance: {{ total_alpine_ski_distance }} km</p>
+                <p>Elevation: {{ total_alpine_ski_elevation }} m</p>
+                <p>Top Speed: {{ max_alpine_ski_speed }} km/h</p>
+                <h3>Averages:</h3>
+                <p>Speed: {{ avg_alpine_ski_speed }} km/h</p>
+                <p>Distance: {{ avg_alpine_ski_distance }} km</p>
+                <p>Elevation: {{ avg_alpine_ski_elevation }} m</p>
+                <p>Heart Rate: {{ avg_alpine_ski_hr }} bpm</p>
+            </div>
+            <div class="flex-child nordic_ski">
+                <h2>Nordic Skis: </h2>
+                <h3>Totals:</h3>
+                <p>Activites: {{ total_nordic_skis }}</p>
+                <p>Distance: {{ total_nordic_ski_distance }} km</p>
+                <p>Elevation: {{ total_nordic_ski_elevation }} m</p>
+                <p>Top Speed: {{ max_nordic_ski_speed }} km/h</p>
+                <h3>Averages:</h3>
+                <p>Speed: {{ avg_nordic_ski_speed }} km/h</p>
+                <p>Distance: {{ avg_nordic_ski_distance }} km</p>
+                <p>Elevation: {{ avg_nordic_ski_elevation }} m</p>
+                <p>Heart Rate: {{ avg_alpine_ski_hr }} bpm</p>
+            </div>
+            <div class="flex-child other">
+                <h2>Other Activities: </h2>
+                <p>{{ other_sport_types | safe }}</p>
             </div>
         </div>
     </div>
@@ -166,12 +221,6 @@
                 <div id="map"></div>
             </div>
             <div class="flex-child legend">
-                <p style="color: green;">Green: Bike Ride</p>
-                <p style="color: red;">Red: Run</p>
-                <p style="color: blue;">Blue: Alpine Ski</p>
-                <p style="color: #77C3EC;">Baby Blue: Nordic Ski</p>
-                <p style="color: brown;">Brown: Hike</p>
-                <p style="color: black;">Black: Other</p>
                 <div class="flex-container">
                     <div class="flex-child datepicker">
                         <div class="datepicker-container">
@@ -179,6 +228,12 @@
                                 <i class="fa fa-calendar"></i>&nbsp;
                                 <span></span> <i class="fa fa-caret-down"></i>
                             </div>
+                            <br>
+                            <form action="/" method="get">
+                                <input type="hidden" id="start-date" name="start_date">
+                                <input type="hidden" id="end-date" name="end_date">
+                                <button type="submit">Submit</button>
+                            </form>
                         </div>
                         <script type="text/javascript">
                             $(function() {
@@ -187,6 +242,9 @@
                             
                                 function cb(start, end) {
                                     $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+
+                                    $('#start-date').val(start.format('MMMM D, YYYY'));
+                                    $('#end-date').val(end.format('MMMM D, YYYY'));
                                 }
                             
                                 $('#reportrange').daterangepicker({
@@ -207,6 +265,12 @@
                         </script>
                     </div>
             </div>
+            <p style="color: green;">Green: Bike Ride</p>
+            <p style="color: red;">Red: Run</p>
+            <p style="color: blue;">Blue: Alpine Ski</p>
+            <p style="color: #77C3EC;">Baby Blue: Nordic Ski</p>
+            <p style="color: brown;">Brown: Hike</p>
+            <p style="color: black;">Black: Other</p>
         </div>
     </div>
     <script src="{{ url_for('static', filename='app.js') }}"></script>

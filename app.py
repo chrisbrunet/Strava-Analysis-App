@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import requests
 import urllib3
 import pandas as pd
@@ -84,86 +84,103 @@ def calculate_lifetime_stats(data_frame):
         round(times_up_everest, 1)
     )
 
-def calculate_bike_run_stats(data_frame, sport_type, commute):
+def format_speed(avg_speed):
+    integer_part = int(avg_speed)
+    decimal_part = avg_speed - integer_part
+    seconds = int(decimal_part * 60)
+    avg_speed_formatted = f"{integer_part}:{seconds}"
+    return avg_speed_formatted
+
+def calculate_activity_stats(data_frame, type, sport_type=None, commute=False):
+    if sport_type is None:
+        sport_type = type
+
     filtered_activities = data_frame[(data_frame['sport_type'] == sport_type) & (data_frame['commute'] == commute)]
     total_count = len(filtered_activities)
-    total_distance = filtered_activities['distance'].sum() / 1000
+    total_distance = filtered_activities['distance'].sum() / 1000 # conversion to km
     total_elevation = filtered_activities['total_elevation_gain'].sum()
-    avg_speed = filtered_activities['average_speed'].mean() * 3.6
+    max_speed_kmh = filtered_activities['max_speed'].max() * 3.6 # conversion to km/h
+    avg_speed_kmh = filtered_activities['average_speed'].mean() * 3.6 # conversion to km/h
+    avg_speed_minkm = (1 / 0.06) / filtered_activities['average_speed'].mean() # conversion to min/km
+    avg_speed_min100m = (1 / 0.6) / filtered_activities['average_speed'].mean() # conversion to min/100m
     avg_power = filtered_activities['average_watts'].mean()
-    avg_distance = filtered_activities['distance'].mean() / 1000
+    avg_distance = filtered_activities['distance'].mean() / 1000 # conversion to km
     avg_elevation = filtered_activities['total_elevation_gain'].mean()
+    avg_hr = filtered_activities['average_heartrate'].mean()
 
     total_count = np.nan_to_num(total_count)
     total_distance = np.nan_to_num(total_distance)
     total_elevation = np.nan_to_num(total_elevation)
-    avg_speed = np.nan_to_num(avg_speed)
+    max_speed_kmh = np.nan_to_num(max_speed_kmh)
+    avg_speed_kmh = np.nan_to_num(avg_speed_kmh)
+    avg_speed_minkm = np.nan_to_num(avg_speed_minkm)
     avg_power = np.nan_to_num(avg_power)
     avg_distance = np.nan_to_num(avg_distance)
     avg_elevation = np.nan_to_num(avg_elevation)
+    avg_hr = np.nan_to_num(avg_hr)
 
-    return(
+    avg_speed_minkm_formatted = format_speed(avg_speed_minkm)
+    avg_speed_min100m_formatted = format_speed(avg_speed_min100m)
+
+    if (type == 'Ride') or (type == 'VirtualRide'):
+        return(
+        total_count, 
+        round(total_distance, 1), 
+        round(total_elevation, 1),
+        round(max_speed_kmh, 1), 
+        round(avg_speed_kmh, 1), 
+        round(avg_power, 1), 
+        round(avg_distance, 1), 
+        round(avg_elevation, 1),
+        round(avg_hr, 1)
+    )
+    elif (type == 'Run') or (type == 'VirtualRun'):
+         return(
         total_count, 
         round(total_distance, 1), 
         round(total_elevation, 1), 
-        round(avg_speed, 1), 
+        avg_speed_minkm_formatted, 
         round(avg_power, 1), 
         round(avg_distance, 1), 
-        round(avg_elevation, 1)
+        round(avg_elevation, 1),
+        round(avg_hr, 1)
     )
-
-def calculate_hike_stats(data_frame, sport_type):
-    filtered_activities = data_frame[data_frame['sport_type'] == sport_type]
-    total_count = len(filtered_activities)
-    total_distance = filtered_activities['distance'].sum() / 1000
-    total_elevation = filtered_activities['total_elevation_gain'].sum()
-    avg_speed = filtered_activities['average_speed'].mean() * 3.6
-    avg_power = filtered_activities['average_watts'].mean()
-    avg_distance = filtered_activities['distance'].mean() / 1000
-    avg_elevation = filtered_activities['total_elevation_gain'].mean()
-
-    total_count = np.nan_to_num(total_count)
-    total_distance = np.nan_to_num(total_distance)
-    total_elevation = np.nan_to_num(total_elevation)
-    avg_speed = np.nan_to_num(avg_speed)
-    avg_power = np.nan_to_num(avg_power)
-    avg_distance = np.nan_to_num(avg_distance)
-    avg_elevation = np.nan_to_num(avg_elevation)
-
-    return(
+    elif type == 'Hike':
+        return(
         total_count, 
         round(total_distance, 1), 
         round(total_elevation, 1), 
-        round(avg_speed, 1), 
-        round(avg_power, 1), 
+        avg_speed_minkm_formatted, 
         round(avg_distance, 1), 
-        round(avg_elevation, 1)
+        round(avg_elevation, 1),
+        round(avg_hr, 1)
     )
-
-def calculate_swim_stats(data_frame, sport_type):
-    filtered_activities = data_frame[data_frame['sport_type'] == sport_type]
-    total_count = len(filtered_activities)
-    total_kudos_count = filtered_activities['kudos_count'].sum()
-    total_distance = filtered_activities['distance'].sum() / 1000
-    avg_speed = filtered_activities['average_speed'].mean() * 3.6
-    avg_distance = filtered_activities['distance'].mean() / 1000
-    avg_heartrate = filtered_activities['average_heartrate']
-
-    total_count = np.nan_to_num(total_count)
-    total_kudos_count = np.nan_to_num(total_kudos_count)
-    total_distance = np.nan_to_num(total_distance)
-    avg_speed = np.nan_to_num(avg_speed)
-    avg_distance = np.nan_to_num(avg_distance)
-    avg_heartrate = np.nan_to_num(avg_heartrate)
-
-    return(
+    elif type == 'Swim':
+        return(
         total_count,
-        total_kudos_count,
         round(total_distance, 1), 
-        round(avg_speed, 1), 
+        avg_speed_min100m_formatted, 
         round(avg_distance, 1), 
-        round(avg_heartrate, 1)
+        round(avg_hr, 1)
     )
+    elif (type == 'AlpineSki') or (type == 'NordicSki'):
+        return(
+        total_count, 
+        round(total_distance, 1), 
+        round(total_elevation, 1), 
+        round(max_speed_kmh, 1),
+        round(avg_speed_kmh, 1), 
+        round(avg_distance, 1), 
+        round(avg_elevation, 1),
+        round(avg_hr, 1)
+    )
+
+def count_other_sport_types(data_frame):
+    standard_sport_types = ['Ride', 'MountainBikeRide', 'VirtualRide', 'Run', 'VirtualRun', 'Hike', 'Swim', 'AlpineSki', 'NordicSki']
+    filtered_activities = data_frame[~data_frame['sport_type'].isin(standard_sport_types)]
+    sport_type_counts = filtered_activities['sport_type'].value_counts().to_dict()
+    formatted_other_sport_types = '<br><br>'.join([f"{key}: {value}" for key, value in sport_type_counts.items()])
+    return formatted_other_sport_types
 
 # Introduction
 print("\nWelcome to the Strava API Test App")
@@ -171,16 +188,17 @@ client_id = '111595'
 client_secret = '8e8f246270159ece4b0eb3c75e494241bad86027'
 refresh_token = '8285947a1614c22ebf0a7308cafb267ed4d9426f'
 
+bounds = [51.036047, -114.150184, 51.054738, -114.111313]
+
 access_token = request_access_token(client_id, client_secret, refresh_token)
 all_activities, all_activities_list = get_activity_data(access_token)
-
-bounds = [51.036047, -114.150184, 51.054738, -114.111313]
 all_segments = get_segments_list(bounds, access_token)
-
-# print(all_activities[all_activities['type'] == 'Swim'].iloc[1])
 
 @app.route('/')
 def index():
+
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
 
     # Lifetime Stats
     l1, l2, l3, l4, l5, l6, l7 = calculate_lifetime_stats(all_activities)
@@ -189,28 +207,39 @@ def index():
     date, name, type, distance = calculate_recent_activity_stats(all_activities)
 
     # Ride stats
-    r1, r2, r3, r4, r5, r6, r7 = calculate_bike_run_stats(all_activities, 'Ride', False)
-    c1, c2, c3, c4, c5, c6, c7 = calculate_bike_run_stats(all_activities, 'Ride', True)
-    m1, m2, m3, m4, m5, m6, m7 = calculate_bike_run_stats(all_activities, 'MountainBikeRide', False)
-    v1, v2, v3, v4, v5, v6, v7 = calculate_bike_run_stats(all_activities, 'VirtualRide', False)
+    r1, r2, r3, r4, r5, r6, r7, r8, r9 = calculate_activity_stats(all_activities, 'Ride')
+    c1, c2, c3, c4, c5, c6, c7, c8, c9 = calculate_activity_stats(all_activities, 'Ride', 'Ride', True)
+    m1, m2, m3, m4, m5, m6, m7, m8, m9 = calculate_activity_stats(all_activities, 'Ride', 'MountainBikeRide')
+    v1, v2, v3, v4, v5, v6, v7, v8, v9 = calculate_activity_stats(all_activities, 'VirtualRide')
 
     # Run/Hike stats
-    or1, or2, or3, or4, or5, or6, or7 = calculate_bike_run_stats(all_activities, 'Run', False)
-    vr1, vr2, vr3, vr4, vr5, vr6, vr7 = calculate_bike_run_stats(all_activities, 'VirtualRun', False)
-    h1, h2, h3, h4, h5, h6, h7 = calculate_hike_stats(all_activities, 'Hike')
+    or1, or2, or3, or4, or5, or6, or7, or8 = calculate_activity_stats(all_activities, 'Run')
+    vr1, vr2, vr3, vr4, vr5, vr6, vr7, vr8 = calculate_activity_stats(all_activities, 'VirtualRun')
+    h1, h2, h3, h4, h5, h6, h7 = calculate_activity_stats(all_activities, 'Hike')
 
     # Other Stats
-    
+    s1, s2, s3, s4, s5 = calculate_activity_stats(all_activities, 'Swim')
+    as1, as2, as3, as4, as5, as6, as7, as8 = calculate_activity_stats(all_activities, 'AlpineSki')
+    ns1, ns2, ns3, ns4, ns5, ns6, ns7, ns8 = calculate_activity_stats(all_activities, 'NordicSki')
+    other_sport_types = count_other_sport_types(all_activities)
+
+    print(f"Start Date: {start_date}")
+    print(f"End Date: {end_date}")
+
     return render_template('index.html',
         kudos_received=l1, heart_beats=l2, distance_travelled=l3, elevation_gained=l4, blood_pumped=l5, times_around_earth=l6, times_up_everest=l7,
         date=date, name=name, type=type, distance=distance, 
-        total_rides=r1, total_ride_distance=r2, total_ride_elevation=r3, avg_ride_speed=r4, avg_ride_power=r5, avg_ride_distance=r6, avg_ride_elevation=r7, 
-        total_commutes=c1, total_commute_distance=c2,total_commute_elevation=c3, avg_commute_speed=c4, avg_commute_power=c5, avg_commute_distance=c6, avg_commute_elevation=c7, 
-        total_mtb=m1, total_mtb_distance=m2, total_mtb_elevation=m3, avg_mtb_speed=m4, avg_mtb_power=m5, avg_mtb_distance=m6, avg_mtb_elevation=m7, 
-        total_virtual_rides=v1, total_virtual_ride_distance=v2, total_virtual_ride_elevation=v3, avg_virtual_ride_speed=v4, avg_virtual_ride_power=v5, avg_virtual_ride_distance=v6, avg_virtual_ride_elevation=v7, 
-        total_outdoor_runs=or1, total_outdoor_run_distance=or2, total_outdoor_run_elevation=or3, avg_outdoor_run_speed=or4, avg_outdoor_run_power=or5, avg_outdoor_distance=or6, avg_outdoor_run_elevation=or7, 
-        total_virtual_runs=vr1, total_virtual_run_distance=vr2, total_virtual_run_elevation=vr3, avg_virtual_run_speed=vr4, avg_virtual_run_power=vr5, avg_virtual_run_distance=vr6, avg_virtual_run_elevation=vr7, 
-        total_hikes=h1, total_hike_distance=h2, total_hike_elevation=h3, avg_hike_speed=h4,avg_hike_power=h5, avg_hike_distance=h6, avg_hike_elevation=h7)
+        total_rides=r1, total_ride_distance=r2, total_ride_elevation=r3, max_ride_speed=r4, avg_ride_speed=r5, avg_ride_power=r6, avg_ride_distance=r7, avg_ride_elevation=r8, avg_ride_hr=r9, 
+        total_commutes=c1, total_commute_distance=c2,total_commute_elevation=c3, max_commute_speed=c4, avg_commute_speed=c5, avg_commute_power=c6, avg_commute_distance=c7, avg_commute_elevation=c8, avg_commute_hr=c9,
+        total_mtb=m1, total_mtb_distance=m2, total_mtb_elevation=m3, max_mtb_speed=m4, avg_mtb_speed=m5, avg_mtb_power=m6, avg_mtb_distance=m7, avg_mtb_elevation=m8, avg_mtb_hr=m9,
+        total_virtual_rides=v1, total_virtual_ride_distance=v2, total_virtual_ride_elevation=v3, max_virtual_ride_speed=v4, avg_virtual_ride_speed=v5, avg_virtual_ride_power=v6, avg_virtual_ride_distance=v7, avg_virtual_ride_elevation=v8, avg_virtual_ride_hr=v9,
+        total_outdoor_runs=or1, total_outdoor_run_distance=or2, total_outdoor_run_elevation=or3, avg_outdoor_run_speed=or4, avg_outdoor_run_power=or5, avg_outdoor_distance=or6, avg_outdoor_run_elevation=or7, avg_outdoor_run_hr=or8,
+        total_virtual_runs=vr1, total_virtual_run_distance=vr2, total_virtual_run_elevation=vr3, avg_virtual_run_speed=vr4, avg_virtual_run_power=vr5, avg_virtual_run_distance=vr6, avg_virtual_run_elevation=vr7, avg_virtual_run_hr=vr8,
+        total_hikes=h1, total_hike_distance=h2, total_hike_elevation=h3, avg_hike_speed=h4, avg_hike_distance=h5, avg_hike_elevation=h6, avg_hike_hr=h7,
+        total_swims=s1, total_swim_distance=s2, avg_swim_speed=s3, avg_swim_distance=s4, avg_swim_hr=s5,
+        total_alpine_skis=as1, total_alpine_ski_distance=as2, total_alpine_ski_elevation=as3, max_alpine_ski_speed=as4, avg_alpine_ski_speed=as5, avg_alpine_ski_distance=as6, avg_alpine_ski_elevation=as7, avg_alpine_ski_hr=as8,
+        total_nordic_skis=ns1, total_nordic_ski_distance=ns2, total_nordic_ski_elevation=ns3, max_nordic_ski_speed=ns4, avg_nordic_ski_speed=ns5, avg_nordic_ski_distance=ns6, avg_nordic_ski_elevation=ns7, avg_nordic_ski_hr=ns8,
+        other_sport_types=other_sport_types)
 
 @app.route('/api/all_activities')
 def get_all_activities():

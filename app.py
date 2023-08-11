@@ -83,11 +83,9 @@ def calculate_recent_activity_stats(data_frame):
     )
 
 def calculate_lifetime_stats(data_frame, start_date, end_date):
-    print(f"Start Date: {start_date}")
-    print(f"End Date: {end_date}")
+    data_frame['heart_beats'] = data_frame['average_heartrate'] * data_frame['moving_time']
     filtered_activities = data_frame.loc[(data_frame['start_date_formatted'] >= start_date) & (data_frame['start_date_formatted'] <= end_date)]
     kudos_received = filtered_activities['kudos_count'].sum()
-    filtered_activities['heart_beats'] = filtered_activities['average_heartrate'] * filtered_activities['moving_time']
     heart_beats = filtered_activities['heart_beats'].sum()
     distance_travelled = filtered_activities['distance'].sum() / 1000
     elevation_gained = filtered_activities['total_elevation_gain'].sum()
@@ -117,8 +115,8 @@ def calculate_activity_stats(data_frame, start_date, end_date, type, sport_type=
     if sport_type is None:
         sport_type = type
 
-    filtered_activities = data_frame.loc[(data_frame['start_date_formatted'] >= start_date) & (data_frame['start_date_formatted'] <= end_date)]
-    filtered_activities = filtered_activities[(filtered_activities['sport_type'] == sport_type) & (filtered_activities['commute'] == commute)]
+    filtered_activities_date = data_frame.loc[(data_frame['start_date_formatted'] >= start_date) & (data_frame['start_date_formatted'] <= end_date)]
+    filtered_activities = filtered_activities_date[(filtered_activities_date['sport_type'] == sport_type) & (filtered_activities_date['commute'] == commute)]
 
     total_count = len(filtered_activities)
     total_distance = filtered_activities['distance'].sum() / 1000 # conversion to km
@@ -250,9 +248,6 @@ def index():
     as1, as2, as3, as4, as5, as6, as7, as8 = calculate_activity_stats(all_activities, start_date, end_date, 'AlpineSki')
     ns1, ns2, ns3, ns4, ns5, ns6, ns7, ns8 = calculate_activity_stats(all_activities, start_date, end_date, 'NordicSki')
     other_sport_types = count_other_sport_types(all_activities)
-
-    print(f"Start Date: {start_date}")
-    print(f"End Date: {end_date}")
 
     return render_template('index.html',
         kudos_received=l1, heart_beats=l2, distance_travelled=l3, elevation_gained=l4, blood_pumped=l5, times_around_earth=l6, times_up_everest=l7,

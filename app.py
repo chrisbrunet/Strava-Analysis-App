@@ -1,12 +1,12 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, session, request
 import requests
 import urllib3
 import pandas as pd
 import numpy as np
-from datetime import date
 
 app = Flask(__name__)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+app.secret_key = '12345'
 
 def request_access_token(client_id, client_secret, refresh_token):
     auth_url = "https://www.strava.com/oauth/token"
@@ -56,14 +56,12 @@ def get_start_end_dates(data_frame):
     end_date = request.args.get('end_date')
 
     if start_date != None:
-        start_date = pd.to_datetime(start_date)
-        start_date = start_date.tz_localize('UTC')
+        start_date = pd.to_datetime(start_date).tz_localize('UTC')
     else:
         start_date = data_frame['start_date_formatted'].min()
 
     if end_date != None:
-        end_date = pd.to_datetime(end_date)
-        end_date = end_date.tz_localize('UTC')
+        end_date = pd.to_datetime(end_date).tz_localize('UTC')
     else:
         end_date = data_frame['start_date_formatted'].max()
 
@@ -218,13 +216,14 @@ all_activities, all_activities_list = get_activity_data(access_token)
 all_segments = get_segments_list(bounds, access_token)
 
 all_activities['start_date_formatted'] = pd.to_datetime(all_activities['start_date'], format='%Y-%m-%d')
-print(all_activities['start_date_formatted'].max())                                                        
 
 @app.route('/')
 def index():
 
     # Getting start end end date from web page
     start_date, end_date = get_start_end_dates(all_activities)
+    session['start_date'] = start_date
+    session['end_date'] = end_date
 
     # Lifetime Stats
     l1, l2, l3, l4, l5, l6, l7 = calculate_lifetime_stats(all_activities, start_date, end_date)
@@ -250,6 +249,7 @@ def index():
     other_sport_types = count_other_sport_types(all_activities)
 
     return render_template('index.html',
+        start_date=start_date, end_date=end_date,
         kudos_received=l1, heart_beats=l2, distance_travelled=l3, elevation_gained=l4, blood_pumped=l5, times_around_earth=l6, times_up_everest=l7,
         date=ra1, name=ra2, type=ra3, distance=ra4, 
         total_rides=r1, total_ride_distance=r2, total_ride_elevation=r3, max_ride_speed=r4, avg_ride_speed=r5, avg_ride_power=r6, avg_ride_distance=r7, avg_ride_elevation=r8, avg_ride_hr=r9, 
@@ -262,12 +262,23 @@ def index():
         total_swims=s1, total_swim_distance=s2, avg_swim_speed=s3, avg_swim_distance=s4, avg_swim_hr=s5,
         total_alpine_skis=as1, total_alpine_ski_distance=as2, total_alpine_ski_elevation=as3, max_alpine_ski_speed=as4, avg_alpine_ski_speed=as5, avg_alpine_ski_distance=as6, avg_alpine_ski_elevation=as7, avg_alpine_ski_hr=as8,
         total_nordic_skis=ns1, total_nordic_ski_distance=ns2, total_nordic_ski_elevation=ns3, max_nordic_ski_speed=ns4, avg_nordic_ski_speed=ns5, avg_nordic_ski_distance=ns6, avg_nordic_ski_elevation=ns7, avg_nordic_ski_hr=ns8,
-        other_sport_types=other_sport_types,
-        start_date=start_date, end_date=end_date)
+        other_sport_types=other_sport_types)
 
 @app.route('/api/all_activities')
 def get_all_activities():
-    return jsonify(all_activities_list)
+    #start_date, end_date = get_start_end_dates(all_activities)
+    start_date = session.get('start_date')
+    end_date = session.get('end_date')
+    print(start_date, end_date)
+    filtered_activities = []
+
+    for activity in all_activities_list:
+        activity_date = pd.to_datetime(activity['start_date'], format='%Y-%m-%d')
+        if start_date <= activity_date <= end_date:
+            filtered_activities.append(activity)
+
+    return jsonify(filtered_activities)
 
 if __name__ == '__main__':
     app.run()
+

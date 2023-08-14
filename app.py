@@ -6,7 +6,6 @@ import numpy as np
 
 app = Flask(__name__)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-app.secret_key = '12345'
 
 def request_access_token(client_id, client_secret, refresh_token):
     auth_url = "https://www.strava.com/oauth/token"
@@ -205,17 +204,21 @@ def count_other_sport_types(data_frame):
 
 # Introduction
 print("\nWelcome to the Strava API Test App")
+
+# Constant variables  
+app.secret_key = '12345' # required in order to use 'session'
 client_id = '111595'
 client_secret = '8e8f246270159ece4b0eb3c75e494241bad86027'
 refresh_token = '8285947a1614c22ebf0a7308cafb267ed4d9426f'
 
+# To be updated as dynamic for user input 
 bounds = [51.036047, -114.150184, 51.054738, -114.111313]
 
+# API requests, getting and formatting Activity data and Segment data from Strava API
 access_token = request_access_token(client_id, client_secret, refresh_token)
 all_activities, all_activities_list = get_activity_data(access_token)
-all_segments = get_segments_list(bounds, access_token)
-
 all_activities['start_date_formatted'] = pd.to_datetime(all_activities['start_date'], format='%Y-%m-%d')
+all_segments = get_segments_list(bounds, access_token)
 
 @app.route('/')
 def index():
@@ -266,17 +269,18 @@ def index():
 
 @app.route('/api/all_activities')
 def get_all_activities():
-    #start_date, end_date = get_start_end_dates(all_activities)
+    # Getting start and end date from index function
     start_date = session.get('start_date')
     end_date = session.get('end_date')
-    print(start_date, end_date)
-    filtered_activities = []
 
+    # Creating new list of date filtered activities
+    filtered_activities = []
     for activity in all_activities_list:
         activity_date = pd.to_datetime(activity['start_date'], format='%Y-%m-%d')
         if start_date <= activity_date <= end_date:
             filtered_activities.append(activity)
 
+    # filtered_activities is accessed by app.js. this data is used to populate the map
     return jsonify(filtered_activities)
 
 if __name__ == '__main__':

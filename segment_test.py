@@ -32,6 +32,7 @@ normalized_data = pd.json_normalize(all_segments['segments'])
 all_segments_df = pd.concat([all_segments, normalized_data], axis=1)
 all_segments_df.drop(columns=['segments'], inplace=True)
 
+# Printing Nearby Segments
 for id in all_segments_df.loc[:, 'id']:
     segment_stats_url = "https://www.strava.com/api/v3/segments/" + str(int(id))
     get_segment_stats = requests.get(segment_stats_url, headers=header).json()

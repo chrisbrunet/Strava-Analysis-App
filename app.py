@@ -7,6 +7,17 @@ import numpy as np
 app = Flask(__name__)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+def save_data_to_csv(data, filename):
+    df = pd.DataFrame(data)
+    df.to_csv(filename, index=False) 
+
+def load_data_from_csv(filename):
+    try:
+        df = pd.read_csv(filename, header=0)
+        return df
+    except FileNotFoundError:
+        return pd.DataFrame()
+
 def request_access_token(client_id, client_secret, refresh_token):
     auth_url = "https://www.strava.com/oauth/token"
     payload = {
@@ -34,11 +45,50 @@ def get_activity_data(access_token):
         if len(get_activities) == 0:
             break
         all_activities_list.extend(get_activities)
+        print(f'\t- Activities: {len(all_activities_list) - len(get_activities)} to {len(all_activities_list)}')
         request_page_num += 1
         all_activities_df = pd.DataFrame(all_activities_list)
     return all_activities_df, all_activities_list
 
-def get_segments_list(bounds, access_token):
+def get_activity_media(data_frame, access_token, filename):
+
+    print('\nGetting Activity Media...')
+    photo_activity_mapping = {}
+    existing_data = load_data_from_csv(filename)
+
+    for index, row in existing_data.iterrows():
+        photo = row['photo']
+        name = row['name']
+        photo_activity_mapping[photo] = name
+
+    new_media_rows = data_frame[
+        (data_frame['id'].isin(existing_data['id']) == False) & 
+        (data_frame['total_photo_count'] > 0) & 
+        (data_frame['type'] != 'VirtualRide') & 
+        (data_frame['type'] != 'VirtualRun')
+    ]        
+    
+    if(new_media_rows.empty == True):
+        print('\t- No New Media')
+    else: 
+        print('\t- Getting New Media')
+
+        for index, row in new_media_rows.iterrows():
+            id = row['id']
+            activity_url = "https://www.strava.com/api/v3/activities/" + str(id)
+            header = {'Authorization': 'Bearer ' + access_token}
+            recent_act = requests.get(activity_url, headers=header).json()
+            photo = recent_act['photos']['primary']['urls']['600']
+            name = recent_act['name']
+            print(f'\t\t{name}')
+            photo_activity_mapping[photo] = name
+        
+        updated_data = pd.concat([existing_data, new_media_rows])
+        save_data_to_csv(updated_data, filename)
+    
+    return photo_activity_mapping
+
+def get_segments(bounds, access_token):
     print("\nGetting Segment Data...")
     segments_url = "https://www.strava.com/api/v3/segments/explore"
     header = {'Authorization': 'Bearer ' + access_token}
@@ -215,10 +265,11 @@ refresh_token = '8285947a1614c22ebf0a7308cafb267ed4d9426f'
 bounds = [51.036047, -114.150184, 51.054738, -114.111313]
 
 # API requests, getting and formatting Activity data and Segment data from Strava API
-access_token = request_access_token(client_id, client_secret, refresh_token)
-all_activities, all_activities_list = get_activity_data(access_token)
-all_activities['start_date_formatted'] = pd.to_datetime(all_activities['start_date'], format='%Y-%m-%d')
-all_segments = get_segments_list(bounds, access_token)
+access_token = request_access_token(client_id, client_secret, refresh_token) # int
+all_activities, all_activities_list = get_activity_data(access_token) # DataFrame, List
+all_activities['start_date_formatted'] = pd.to_datetime(all_activities['start_date'], format='%Y-%m-%d') # Add column to df
+all_segments = get_segments(bounds, access_token) # DataFrame
+photos = get_activity_media(all_activities, access_token, 'activities_csv') # Dictionary
 
 @app.route('/')
 def index():
@@ -251,6 +302,8 @@ def index():
     ns1, ns2, ns3, ns4, ns5, ns6, ns7, ns8 = calculate_activity_stats(all_activities, start_date, end_date, 'NordicSki')
     other_sport_types = count_other_sport_types(all_activities)
 
+    ph = photos
+
     return render_template('index.html',
         start_date=start_date, end_date=end_date,
         kudos_received=l1, heart_beats=l2, distance_travelled=l3, elevation_gained=l4, blood_pumped=l5, times_around_earth=l6, times_up_everest=l7,
@@ -265,7 +318,8 @@ def index():
         total_swims=s1, total_swim_distance=s2, avg_swim_speed=s3, avg_swim_distance=s4, avg_swim_hr=s5,
         total_alpine_skis=as1, total_alpine_ski_distance=as2, total_alpine_ski_elevation=as3, max_alpine_ski_speed=as4, avg_alpine_ski_speed=as5, avg_alpine_ski_distance=as6, avg_alpine_ski_elevation=as7, avg_alpine_ski_hr=as8,
         total_nordic_skis=ns1, total_nordic_ski_distance=ns2, total_nordic_ski_elevation=ns3, max_nordic_ski_speed=ns4, avg_nordic_ski_speed=ns5, avg_nordic_ski_distance=ns6, avg_nordic_ski_elevation=ns7, avg_nordic_ski_hr=ns8,
-        other_sport_types=other_sport_types)
+        other_sport_types=other_sport_types,
+        photos = ph)
 
 @app.route('/api/all_activities')
 def get_all_activities():

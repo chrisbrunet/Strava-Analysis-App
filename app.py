@@ -8,10 +8,29 @@ app = Flask(__name__)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def save_data_to_csv(data, filename):
+    """
+        Saves a Pandas DataFrame to csv file in local workspace
+
+        Parameters:
+            data: DataFrame
+            filename: string
+
+        Returns:
+            none
+    """
     df = pd.DataFrame(data)
     df.to_csv(filename, index=False) 
 
 def load_data_from_csv(filename):
+    """
+    Loads data from csv file into Pandas DataFrame
+
+    Parameters:
+        filename: string
+
+    Returns:
+        df: DataFrame
+    """
     try:
         df = pd.read_csv(filename, header=0)
         return df
@@ -19,6 +38,17 @@ def load_data_from_csv(filename):
         return pd.DataFrame()
 
 def request_access_token(client_id, client_secret, refresh_token):
+    """
+    Post request to refresh and get new API access token
+
+    Parameters:
+        client_id: string
+        client_secret: string
+        refresh_token: string
+    
+    Returns:
+        access_token: string
+    """
     auth_url = "https://www.strava.com/oauth/token"
     payload = {
         'client_id': client_id,
@@ -34,34 +64,59 @@ def request_access_token(client_id, client_secret, refresh_token):
     return access_token
 
 def get_activity_data(access_token):
+    """
+    Get request for Strava user activity data 
+
+    Parameters:
+        client_id: string
+        client_secret: string
+        refresh_token: string
+    
+    Returns:
+        all_activities_df: DataFrame
+        all_activities_list: list
+    """
     print("\nGetting Activity Data...")
     activities_url = "https://www.strava.com/api/v3/athlete/activities"
     header = {'Authorization': 'Bearer ' + access_token}
     request_page_num = 1
     all_activities_list = []
-    while True:
+    
+    while True: # since max 200 activities can be accessed per request, while loop runs until all activities are loaded
         param = {'per_page': 200, 'page': request_page_num}
         get_activities = requests.get(activities_url, headers=header,params=param).json()
-        if len(get_activities) == 0:
+        if len(get_activities) == 0: # exit condition
             break
         all_activities_list.extend(get_activities)
         print(f'\t- Activities: {len(all_activities_list) - len(get_activities)} to {len(all_activities_list)}')
         request_page_num += 1
-        all_activities_df = pd.DataFrame(all_activities_list)
+    
+    all_activities_df = pd.DataFrame(all_activities_list)
     return all_activities_df, all_activities_list
 
 def get_activity_media(data_frame, access_token, filename):
+    """
+    Get request for Strava activity media
+
+    Parameters:
+        data_frame: DataFrame
+        access_token: string
+        filename: string
+
+    Returns:
+        photo_activity_mapping: dict
+    """
 
     print('\nGetting Activity Media...')
     photo_activity_mapping = {}
     existing_data = load_data_from_csv(filename)
 
-    for index, row in existing_data.iterrows():
+    for index, row in existing_data.iterrows(): # load all saved media into dictionary 
         photo = row['photo']
         name = row['name']
         photo_activity_mapping[photo] = name
 
-    new_media_rows = data_frame[
+    new_media_rows = data_frame[ # cross reference all activities with existing data to check for new media
         (data_frame['id'].isin(existing_data['id']) == False) & 
         (data_frame['total_photo_count'] > 0) & 
         (data_frame['type'] != 'VirtualRide') & 
@@ -73,7 +128,7 @@ def get_activity_media(data_frame, access_token, filename):
     else: 
         print('\t- Getting New Media')
 
-        for index, row in new_media_rows.iterrows():
+        for index, row in new_media_rows.iterrows(): # initiate get request for all activities with new media and add to dictionary 
             id = row['id']
             activity_url = "https://www.strava.com/api/v3/activities/" + str(id)
             header = {'Authorization': 'Bearer ' + access_token}
@@ -84,11 +139,21 @@ def get_activity_media(data_frame, access_token, filename):
             photo_activity_mapping[photo] = name
         
         updated_data = pd.concat([existing_data, new_media_rows])
-        save_data_to_csv(updated_data, filename)
+        save_data_to_csv(updated_data, filename) # save new data to csv in order to minimize future get requests
     
     return photo_activity_mapping
 
 def get_segments(bounds, access_token):
+    """
+    Get request for Strava segment data within defined area
+
+    Paramaters:
+        bounds: list of type double
+        access_token: string
+
+    Returns:
+        all_segments_df: DataFrame
+    """
     print("\nGetting Segment Data...")
     segments_url = "https://www.strava.com/api/v3/segments/explore"
     header = {'Authorization': 'Bearer ' + access_token}
@@ -101,9 +166,21 @@ def get_segments(bounds, access_token):
     return all_segments_df
 
 def get_start_end_dates(data_frame):
+    """
+    Get start and end date selected with date picker on web page
+
+    Paramaters:
+        data_frame: DataFrame
+
+    Returns:
+        start_date: string
+        end_date: string
+    """
+    # get dates from front end
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
+    # processing and fomratting dates
     if start_date != None:
         start_date = pd.to_datetime(start_date).tz_localize('UTC')
     else:
@@ -117,6 +194,18 @@ def get_start_end_dates(data_frame):
     return start_date, end_date
 
 def calculate_recent_activity_stats(data_frame):
+    """
+    Calculates basic stats from most recent activity
+
+    Parameters:
+        data_frame: DataFrame
+
+    Returns:
+        date: string
+        name: string
+        type: string
+        distance: double
+    """
     date = data_frame.loc[0, 'start_date']
     name = data_frame.loc[0, 'name']
     type = data_frame.loc[0, 'type']
@@ -130,6 +219,23 @@ def calculate_recent_activity_stats(data_frame):
     )
 
 def calculate_lifetime_stats(data_frame, start_date, end_date):
+    """
+    Calculates basic cumulative stats from all activities within date range
+
+    Parameters:
+        data_frame: DataFrame
+        start_date: string
+        end_date: string
+
+    Returns:
+        kudos_received: int
+        heart_beats: string
+        distance_travelled: string
+        elevation_gained: string
+        blood_pumped: string
+        times_around_earth: double
+        times_up_everest: double
+    """
     data_frame['heart_beats'] = data_frame['average_heartrate'] * data_frame['moving_time']
     filtered_activities = data_frame.loc[(data_frame['start_date_formatted'] >= start_date) & (data_frame['start_date_formatted'] <= end_date)]
     kudos_received = filtered_activities['kudos_count'].sum()
@@ -152,6 +258,15 @@ def calculate_lifetime_stats(data_frame, start_date, end_date):
     )
 
 def format_speed(avg_speed):
+    """
+    Formats speed in min/distance from decimal to min:sec form
+
+    Parameters:
+        avg_speed: double
+
+    Returns:
+        avg_speed_formatted: string
+    """
     integer_part = int(avg_speed)
     decimal_part = avg_speed - integer_part
     seconds = int(decimal_part * 60)
@@ -159,12 +274,34 @@ def format_speed(avg_speed):
     return avg_speed_formatted
 
 def calculate_activity_stats(data_frame, start_date, end_date, type, sport_type=None, commute=False):
+    """
+    Calculates detailed stats for different activity types within date range
+
+    Paramaters:
+        data_frame: DataFrame
+        start_date: string
+        end_date: string
+        type: string
+        sport_type: string
+        commute: boolean
+
+    Returns:
+        Ride Stats: various
+        VirtualRide stats: various
+        Run Stats: various
+        VirtualRun stats: various
+        Hike stats: various
+        Swim stats: various
+        AlpineSki stats: various
+        NordicSki stats: various
+    """
     if sport_type is None:
         sport_type = type
 
     filtered_activities_date = data_frame.loc[(data_frame['start_date_formatted'] >= start_date) & (data_frame['start_date_formatted'] <= end_date)]
     filtered_activities = filtered_activities_date[(filtered_activities_date['sport_type'] == sport_type) & (filtered_activities_date['commute'] == commute)]
 
+    # calculating relevant stats
     total_count = len(filtered_activities)
     total_distance = filtered_activities['distance'].sum() / 1000 # conversion to km
     total_elevation = filtered_activities['total_elevation_gain'].sum()
@@ -177,6 +314,7 @@ def calculate_activity_stats(data_frame, start_date, end_date, type, sport_type=
     avg_elevation = filtered_activities['total_elevation_gain'].mean()
     avg_hr = filtered_activities['average_heartrate'].mean()
 
+    # converting any nan values to 0
     total_count = np.nan_to_num(total_count)
     total_distance = np.nan_to_num(total_distance)
     total_elevation = np.nan_to_num(total_elevation)
@@ -189,6 +327,7 @@ def calculate_activity_stats(data_frame, start_date, end_date, type, sport_type=
     avg_elevation = np.nan_to_num(avg_elevation)
     avg_hr = np.nan_to_num(avg_hr)
 
+    # formatting speed of run/hike/swim activities
     avg_speed_minkm_formatted = format_speed(avg_speed_minkm)
     avg_speed_min100m_formatted = format_speed(avg_speed_min100m)
 
@@ -246,8 +385,17 @@ def calculate_activity_stats(data_frame, start_date, end_date, type, sport_type=
     )
 
 def count_other_sport_types(data_frame):
+    """
+    Prints string of other activites not inlcuded in calculate_activity_stats function
+
+    Parameters:
+        data_frame: DataFrame
+    
+    Returns:
+        formatted_other_sport_types: string
+    """
     standard_sport_types = ['Ride', 'MountainBikeRide', 'VirtualRide', 'Run', 'VirtualRun', 'Hike', 'Swim', 'AlpineSki', 'NordicSki']
-    filtered_activities = data_frame[~data_frame['sport_type'].isin(standard_sport_types)]
+    filtered_activities = data_frame[(data_frame['sport_type'].isin(standard_sport_types) == False)]
     sport_type_counts = filtered_activities['sport_type'].value_counts().to_dict()
     formatted_other_sport_types = '<br><br>'.join([f"{key}: {value}" for key, value in sport_type_counts.items()])
     return formatted_other_sport_types

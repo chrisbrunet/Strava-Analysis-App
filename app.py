@@ -108,13 +108,9 @@ def get_activity_media(data_frame, access_token, filename):
     """
 
     print('\nGetting Activity Media...')
+
     photo_activity_mapping = {}
     existing_data = load_data_from_csv(filename)
-
-    for index, row in existing_data.iterrows(): # load all saved media into dictionary 
-        photo = row['photo']
-        name = row['name']
-        photo_activity_mapping[photo] = name
 
     new_media_rows = data_frame[ # cross reference all activities with existing data to check for new media
         (data_frame['id'].isin(existing_data['id']) == False) & 
@@ -127,7 +123,7 @@ def get_activity_media(data_frame, access_token, filename):
         print('\t- No New Media')
     else: 
         print('\t- Getting New Media')
-
+        new_media_rows_formatted = pd.DataFrame(columns=['id', 'photo', 'name'])
         for index, row in new_media_rows.iterrows(): # initiate get request for all activities with new media and add to dictionary 
             id = row['id']
             activity_url = "https://www.strava.com/api/v3/activities/" + str(id)
@@ -137,9 +133,15 @@ def get_activity_media(data_frame, access_token, filename):
             name = recent_act['name']
             print(f'\t\t{name}')
             photo_activity_mapping[photo] = name
-        
-        updated_data = pd.concat([existing_data, new_media_rows])
+            new_media_rows_formatted = pd.concat([new_media_rows_formatted, pd.DataFrame({'id': id, 'photo': photo, 'name': name}, index=[0])])
+    
+        updated_data = pd.concat([new_media_rows_formatted, existing_data])
         save_data_to_csv(updated_data, filename) # save new data to csv in order to minimize future get requests
+
+    for index, row in existing_data.iterrows(): # load all saved media into dictionary 
+        photo = row['photo']
+        name = row['name']
+        photo_activity_mapping[photo] = name
     
     return photo_activity_mapping
 

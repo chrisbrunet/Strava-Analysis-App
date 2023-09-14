@@ -17,9 +17,11 @@ function map(data){
     for(var x = 0; x < data.length; x++){
       var coordinates = L.Polyline.fromEncoded(data[x].map.summary_polyline).getLatLngs()
       var line_color
+      var name = data[x].name
       var type = data[x].type
       var dist = data[x].distance / 1000
       var speed = data[x].average_speed * 3.6
+      var elevation = data[x].total_elevation_gain
 
       if(type == 'Ride'){
         line_color = 'green'
@@ -45,7 +47,8 @@ function map(data){
         }
       ).addTo(map)
 
-      activity.bindPopup(type + " " + (Math.round(dist * 100)/100) + "km " + (Math.round(speed * 100)/100) + "km/h");
+      activity.bindPopup(name + "<br>" + type + "<br>" + (Math.round(dist * 100)/100) + " km <br>" + (Math.round(speed * 100)/100) + " km/h <br>"
+        + elevation + " m");
 
     }
 }

@@ -417,7 +417,7 @@ bounds = [51.036047, -114.150184, 51.054738, -114.111313]
 # API requests, getting and formatting Activity data and Segment data from Strava API
 access_token = request_access_token(client_id, client_secret, refresh_token) # int
 all_activities, all_activities_list = get_activity_data(access_token) # DataFrame, List
-all_activities['start_date_formatted'] = pd.to_datetime(all_activities['start_date'], format='%Y-%m-%d') # Add column to df
+all_activities['start_date_formatted'] = pd.to_datetime(all_activities['start_date'], format='%Y-%m-%dT%H:%M:%SZ') # Add column to df
 all_segments = get_segments(bounds, access_token) # DataFrame
 photos = get_activity_media(all_activities, access_token, 'activities_csv') # Dictionary
 

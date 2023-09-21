@@ -417,7 +417,7 @@ bounds = [51.036047, -114.150184, 51.054738, -114.111313]
 # API requests, getting and formatting Activity data and Segment data from Strava API
 access_token = request_access_token(client_id, client_secret, refresh_token) # int
 all_activities, all_activities_list = get_activity_data(access_token) # DataFrame, List
-all_activities['start_date_formatted'] = pd.to_datetime(all_activities['start_date'], format='%Y-%m-%d') # Add column to df
+all_activities['start_date_formatted'] = pd.to_datetime(all_activities['start_date'], format='%Y-%m-%dT%H:%M:%SZ', utc=True) # Add column to df
 all_segments = get_segments(bounds, access_token) # DataFrame
 photos = get_activity_media(all_activities, access_token, 'activities_csv') # Dictionary
 
@@ -474,13 +474,19 @@ def index():
 @app.route('/api/all_activities')
 def get_all_activities():
     # Getting start and end date from index function
-    start_date = session.get('start_date')
-    end_date = session.get('end_date')
+    start_date_str = session.get('start_date')
+    end_date_str = session.get('end_date')
 
-    # Creating new list of date filtered activities
+    # Convert start_date_str and end_date_str to datetime objects with timezone awareness if not already done
+    start_date = pd.to_datetime(start_date_str, format='%Y-%m-%dT%H:%M:%SZ', utc=True)
+    end_date = pd.to_datetime(end_date_str, format='%Y-%m-%dT%H:%M:%SZ', utc=True)
+
+    # Creating a new list of date-filtered activities
     filtered_activities = []
     for activity in all_activities_list:
-        activity_date = pd.to_datetime(activity['start_date'], format='%Y-%m-%d')
+        activity_date_str = activity['start_date']
+        activity_date = pd.to_datetime(activity_date_str, format='%Y-%m-%dT%H:%M:%SZ', utc=True)
+
         if start_date <= activity_date <= end_date:
             filtered_activities.append(activity)
 

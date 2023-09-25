@@ -4,6 +4,7 @@ body {
   background-color: #d9d9d9; /* Grey background */
   margin: 0;
   padding: 0;
+  border-radius: 6px;
 }
 
 /* Header Styles */
@@ -21,11 +22,13 @@ h1 {
   padding: 18px;
   width: calc(100% - 36px); /* Adjusted to evenly space panels */
   margin: 0 18px; /* Evenly space panels from sides */
+  margin-top: 8px;
   text-align: left;
   border: none;
   outline: none;
   transition: background-color 0.4s, color 0.4s;
   font-size: large;
+  border-radius: 6px;
 }
 
 .active, .accordion:hover {
@@ -38,6 +41,8 @@ h1 {
   display: none;
   overflow: hidden;
   margin: 0 18px; /* Evenly space panels from sides */
+  margin-top: 6px;
+  border-radius: 8px;
 }
 
 .main-container {
@@ -50,6 +55,7 @@ h1 {
   flex-wrap: wrap;
   margin: 0 -10px;
   background-color: #d9d9d9;
+  border-radius: 8px;
 }
 
 .flex-child {
@@ -59,6 +65,7 @@ h1 {
   padding: 20px;
   background-color: #ffffff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 .main-container {
@@ -90,12 +97,18 @@ h1 {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.legendlow{
+  font-size: large;
+}
+
 
 #map {
   display: block;
   height: 100%;
   width: 100%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0;
+  padding: 0;
 }
 
 /* Datepicker Styles */
@@ -118,10 +131,11 @@ h1 {
   margin: 10px 0;
   cursor: pointer;
   transition: background-color 0.4s;
+  border-radius: 6px;
 }
 
 .button:hover {
-  background-color: #ff7043; /* Lighter shade of orange for hover effect */
+  background-color: #f18d6f; /* Lighter shade of orange for hover effect */
 }
 
 #gallery {

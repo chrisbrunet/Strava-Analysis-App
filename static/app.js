@@ -24,17 +24,17 @@ function map(data){
       var elevation = data[x].total_elevation_gain
 
       if(type == 'Ride'){
-        line_color = 'green'
+        line_color = '#00b159'
       } else if(type == 'Run') {
-        line_color = 'red'
+        line_color = '#d11141'
       } else if(type == 'AlpineSki'){
-        line_color = 'blue'
+        line_color = '#00aedb'
       } else if(type == 'NordicSki') {
-        line_color = '#77C3EC'
+        line_color = '#00aedb'
       } else if(type == 'Hike') {
-        line_color = 'brown'
+        line_color = '#f37735'
       } else {
-        line_color = 'black'
+        line_color = '#ffc425'
       }
      
       var activity = L.polyline(

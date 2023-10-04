@@ -3,6 +3,7 @@ import requests
 import urllib3
 import pandas as pd
 import numpy as np
+import pytz
 
 app = Flask(__name__)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -209,12 +210,18 @@ def calculate_recent_activity_stats(data_frame):
         distance: double
     """
     date = data_frame.loc[0, 'start_date']
+    date_formatted = pd.to_datetime(date)
+    mt_timezone = pytz.timezone('US/Mountain')
+    date_mt = date_formatted.astimezone(mt_timezone)
+    date_formatted = date_mt.strftime("%B %d, %Y at %I:%M%p")
+
+
     name = data_frame.loc[0, 'name']
     type = data_frame.loc[0, 'type']
     distance = round(data_frame.loc[0, 'distance'] / 1000, 1)
 
     return(
-        date,
+        date_formatted,
         name,
         type,
         distance,
@@ -243,7 +250,8 @@ def calculate_lifetime_stats(data_frame, start_date, end_date):
     kudos_received = filtered_activities['kudos_count'].sum()
     heart_beats = filtered_activities['heart_beats'].sum()
     distance_travelled = filtered_activities['distance'].sum() / 1000
-    elevation_gained = filtered_activities['total_elevation_gain'].sum()
+    filtered_activities_elevation = filtered_activities.loc[(filtered_activities['type'] != 'AlpineSki') & (filtered_activities['type'] != 'VirtualRide')]
+    elevation_gained = filtered_activities_elevation['total_elevation_gain'].sum()
 
     times_around_earth = distance_travelled / 40075 # circumference of earth
     blood_pumped = heart_beats * 0.07 # average volume of blood pumped per beat

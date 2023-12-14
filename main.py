@@ -4,6 +4,7 @@ import urllib3
 import pandas as pd
 import numpy as np
 import pytz
+from config import SECRET_KEY, CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN 
 
 app = Flask(__name__)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -414,10 +415,10 @@ def count_other_sport_types(data_frame):
 print("\nWelcome to the Strava API Test App")
 
 # Constant variables  
-app.secret_key = '12345' # required in order to use 'session'
-client_id = '111595'
-client_secret = '8e8f246270159ece4b0eb3c75e494241bad86027'
-refresh_token = '8285947a1614c22ebf0a7308cafb267ed4d9426f'
+app.secret_key = SECRET_KEY
+client_id = CLIENT_ID
+client_secret = CLIENT_SECRET
+refresh_token = REFRESH_TOKEN
 
 # To be updated as dynamic for user input 
 bounds = [51.036047, -114.150184, 51.054738, -114.111313]
